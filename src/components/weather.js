@@ -19,6 +19,15 @@ export function temperaturePlot(forecast, {width, height} = {}) {
   });
 }
 
+// TODO: figure out how to pull this out into a library
+function arealine(data, {color, fillOpacity = 0.1, ...options} = {}) {
+    return Plot.marks(
+      Plot.ruleY([0]),
+      Plot.areaY(data, {fill: color, fillOpacity, ...options}),
+      Plot.lineY(data, {stroke: color, ...options})
+    );
+  }
+
 export function precipPlot(forecast, {width, height} = {}) {
   return Plot.plot({
     title: "Hourly precipitation % forecast",
@@ -27,13 +36,10 @@ export function precipPlot(forecast, {width, height} = {}) {
     x: {type: "utc", ticks: "day", label: null},
     y: {grid: true, inset: 10, label: "Precip %"},
     marks: [
-      Plot.lineY(forecast.properties.periods, {
-        x: "startTime",
+      arealine(forecast.properties.periods, {
+        x: "startTime", 
         y: (d) => d.probabilityOfPrecipitation.value,
-        z: null, // varying color, not series
-        // stroke: "probabilityOfPrecipitation",
-        curve: "step-after"
-      })
+        color: "blue"})
     ]
   });
 }
