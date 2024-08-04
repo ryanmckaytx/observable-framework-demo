@@ -1,6 +1,11 @@
 # Hello Framework
+This is an [Observable Framework](https://observablehq.com/framework) project. 
 
-This is an [Observable Framework](https://observablehq.com/framework) project. To start the local preview server, run:
+View the generated static site in github pages:
+[https://ryanmckaytx.github.io/observable-framework-demo/](https://ryanmckaytx.github.io/observable-framework-demo/)
+
+
+To start the local preview server, run:
 
 ```
 npm run dev
