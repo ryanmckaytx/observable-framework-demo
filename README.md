@@ -4,6 +4,13 @@ This is an [Observable Framework](https://observablehq.com/framework) project.
 View the generated static site in github pages:
 [https://ryanmckaytx.github.io/observable-framework-demo/](https://ryanmckaytx.github.io/observable-framework-demo/)
 
+Flow:
+```mermaid
+flowchart LR
+    A[Static Content] --> C
+    B[Dynamic Data Loaders] --> C
+    C(github actions) --> |npm run build| D(github pages)
+```
 
 To start the local preview server, run:
 
