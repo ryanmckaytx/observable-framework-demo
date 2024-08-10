@@ -13,7 +13,8 @@ export function temperaturePlot(forecast, {width, height} = {}) {
         y: "temperature",
         z: null, // varying color, not series
         stroke: "temperature",
-        curve: "step-after"
+        curve: "step-after",
+        tip: true
       })
     ]
   });
@@ -24,7 +25,7 @@ function arealine(data, {color, fillOpacity = 0.1, ...options} = {}) {
     return Plot.marks(
       Plot.ruleY([0]),
       Plot.areaY(data, {fill: color, fillOpacity, ...options}),
-      Plot.lineY(data, {stroke: color, ...options})
+      Plot.lineY(data, {stroke: color, tip: true, ...options})
     );
   }
 
@@ -39,7 +40,8 @@ export function precipPlot(forecast, {width, height} = {}) {
       arealine(forecast.properties.periods, {
         x: "startTime", 
         y: (d) => d.probabilityOfPrecipitation.value,
-        color: "blue"})
+        color: "blue"
+      })
     ]
   });
 }
