@@ -5,7 +5,7 @@ toc: false
 # Weather report
 
 ```js
-const forecast = await FileAttachment("./data/forecast.json").json();
+const forecast = await FileAttachment("./data/pyforecast.json").json();
 display(forecast)
 ```
 
