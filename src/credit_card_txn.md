@@ -16,7 +16,6 @@ const merchants = [null].concat(merchants_csv.map(item => item.merchant).sort())
 ```
 
 ```js
-// const merchant = view(Inputs.select(merchants, {label: "Merchant"}));
 const selected_merchant = view(
   Inputs.select(merchants, {
     label: "Merchant",
@@ -28,10 +27,24 @@ const selected_merchant = view(
 SELECT * FROM txn1mm WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
 ```
 
-<div class="grid grid-cols-4">
+```js
+const amt_col = selected_merchants_data.getChild('amt');
+const sum = amt_col.toArray().reduce((acc, val) => acc + val, 0);
+const avg = sum / selected_merchants_data.numRows
+```
+
+<div class="grid grid-cols-3">
   <div class="card">
     <h2>Number of Transactions</h2>
     <span class="big">${selected_merchants_data.numRows.toLocaleString("en-US")}</span>
+  </div>
+  <div class="card">
+    <h2>Sum of Transaction Amounts</h2>
+    <span class="big">${sum.toLocaleString("en-US")}</span>
+  </div>
+  <div class="card">
+    <h2>Average of Transaction Amounts</h2>
+    <span class="big">${avg.toFixed(2).toLocaleString("en-US")}</span>
   </div>
 </div>
 
