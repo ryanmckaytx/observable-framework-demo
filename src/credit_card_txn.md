@@ -23,20 +23,50 @@ const selected_merchant = view(
 );
 ```
 
-```sql id=selected_merchants_data
+```sql id=filtered_transactions
 SELECT * FROM txn1mm WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
+```
+```sql id=filtered_category_breakdown
+SELECT category, COUNT(*) as count
+FROM txn1mm WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant} 
+GROUP BY category
 ```
 
 ```js
-const amt_col = selected_merchants_data.getChild('amt');
+const amt_col = filtered_transactions.getChild('amt');
 const sum = amt_col.toArray().reduce((acc, val) => acc + val, 0);
-const avg = sum / selected_merchants_data.numRows
+const avg = sum / filtered_transactions.numRows
+```
+
+```js
+function categoryBreakdown(data, {width} = {}) {
+  return Plot.plot({
+    marginBottom: 80,
+    x: {
+      tickRotate: -30,
+    },
+    y: {
+      transform: (d) => d / 1000,
+      label: "↑ Number of Transactions (thousands)",
+      grid: 5
+    },
+    marks: [
+      Plot.ruleY([0]),
+      Plot.barY(data, {
+        x: "category",
+        y: "count",
+        sort: { x: "y", reverse: true, limit: 20 },
+        fill: "steelblue"
+      }),
+    ]
+  });
+}
 ```
 
 <div class="grid grid-cols-3">
   <div class="card">
     <h2>Number of Transactions</h2>
-    <span class="big">${selected_merchants_data.numRows.toLocaleString("en-US")}</span>
+    <span class="big">${filtered_transactions.numRows.toLocaleString("en-US")}</span>
   </div>
   <div class="card">
     <h2>Sum of Transaction Amounts</h2>
@@ -46,8 +76,13 @@ const avg = sum / selected_merchants_data.numRows
     <h2>Average of Transaction Amounts</h2>
     <span class="big">${avg.toFixed(2).toLocaleString("en-US")}</span>
   </div>
+  <div class="card grid-rowspan-4 grid-colspan-3">
+    <h2>Category Breakdown</h2>
+    ${resize((width) => categoryBreakdown(filtered_category_breakdown, {width}))}
+  </div>
 </div>
 
+
 ```js
-view(Inputs.table(selected_merchants_data))
+view(Inputs.table(filtered_transactions))
 ```
