@@ -6,15 +6,18 @@ export default {
   // The pages and sections in the sidebar. If you don’t specify this option,
   // all pages will be listed in alphabetical order. Listing pages explicitly
   // lets you organize them into sections and have unlisted pages.
-  // pages: [
-  //   {
-  //     name: "Examples",
-  //     pages: [
-  //       {name: "Dashboard", path: "/example-dashboard"},
-  //       {name: "Report", path: "/example-report"}
-  //     ]
-  //   }
-  // ],
+  pages: [
+    {
+      name: "Examples",
+      pages: [
+        {name: "Sales Dashboard", path: "/sales"},
+        {name: "Credit Card Dashboard", path: "/credit_card_txn"},
+        {name: "Weather Dashboard", path: "/weather"},
+        {name: "Generated Dashboard", path: "/example-dashboard"},
+        {name: "Generated Report", path: "/example-report"}
+      ]
+    }
+  ],
 
   // Content to add to the head of the page, e.g. for a favicon:
   head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',
