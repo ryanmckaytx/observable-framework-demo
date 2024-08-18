@@ -26,11 +26,41 @@ const selected_merchant = view(
 ```sql id=filtered_transactions
 SELECT * FROM txn1mm WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
 ```
+```sql id=filtered_top_1000_rollup_by_amt
+select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, merchant, lat, long
+FROM txn1mm
+WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
+GROUP BY all
+ORDER BY 2 desc
+LIMIT 1000
+```
 
 ```js
 const amt_col = filtered_transactions.getChild('amt');
 const sum = amt_col.toArray().reduce((acc, val) => acc + val, 0);
 const avg = sum / filtered_transactions.numRows
+```
+
+```js
+const us = await FileAttachment("./data/us-counties-10m.json").json()
+const states = topojson.feature(us, us.objects.states)
+function salesGeo(data, {width} = {}) {
+  return Plot.plot({
+    projection: "albers-usa",
+    marks: [
+      Plot.geo(states),
+      // Plot.geo(statemesh, {strokeOpacity: 0.2})
+      Plot.dot(data, {
+        x: "long",
+        y: "lat",
+        r: "txn_amt_sum",
+        // fill: "PrimSource", // Update dot fill color to depend on primary source (variable: PrimSource)
+        opacity: 0.7, // Decrease opacity (0 = transparent, 1 = opaque)
+        tip: true
+      })
+    ]
+  });
+};
 ```
 
 <div class="grid grid-cols-3">
@@ -45,6 +75,10 @@ const avg = sum / filtered_transactions.numRows
   <div class="card">
     <h2>Average of Transaction Amounts</h2>
     <span class="big">${avg.toFixed(2).toLocaleString("en-US")}</span>
+  </div>
+  <div class="card grid-rowspan-4 grid-colspan-3">
+    <h2>Sales $ Volume by Location</h2>
+    ${resize((width) => salesGeo(filtered_top_1000_rollup_by_amt, {width}))}
   </div>
 </div>
 
