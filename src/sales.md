@@ -44,7 +44,7 @@ const avg = sum / filtered_transactions.numRows
 ```js
 const us = await FileAttachment("./data/us-counties-10m.json").json()
 const states = topojson.feature(us, us.objects.states)
-function salesGeo(data, {width} = {}) {
+function salesGeoBubble(data, {width} = {}) {
   return Plot.plot({
     projection: "albers-usa",
     marks: [
@@ -61,9 +61,33 @@ function salesGeo(data, {width} = {}) {
     ]
   });
 };
+function salesGeoHexBin(data, {width} = {}) {
+  return Plot.plot({
+    projection: "albers-usa",
+    marks: [
+      Plot.geo(states),
+      Plot.dot(
+        data,
+        Plot.hexbin(
+          { r: "sum", fill: "sum" },
+          { x: "long", y: "lat", fill:"txn_amt_sum" }
+        )
+      )
+    ],
+    height: 500,
+    width: 800,
+    margin: 50,
+    r: { range: [0, 15] },
+    color: {
+      legend: true,
+      label: "Sales",
+      scheme: "cool"
+    }
+  });
+};
 ```
 
-<div class="grid grid-cols-3">
+<div class="grid grid-cols-4">
   <div class="card">
     <h2>Number of Transactions</h2>
     <span class="big">${filtered_transactions.numRows.toLocaleString("en-US")}</span>
@@ -76,13 +100,18 @@ function salesGeo(data, {width} = {}) {
     <h2>Average of Transaction Amounts</h2>
     <span class="big">${avg.toFixed(2).toLocaleString("en-US")}</span>
   </div>
-  <div class="card grid-rowspan-4 grid-colspan-3">
+  <div class="card grid-rowspan-4 grid-colspan-2">
     <h2>Sales $ Volume by Location</h2>
-    ${resize((width) => salesGeo(filtered_top_1000_rollup_by_amt, {width}))}
+    ${resize((width) => salesGeoBubble(filtered_top_1000_rollup_by_amt, {width}))}
+  </div>
+  <div class="card grid-rowspan-4 grid-colspan-2">
+    <h2>Sales $ Volume by Location</h2>
+    ${resize((width) => salesGeoHexBin(filtered_top_1000_rollup_by_amt, {width}))}
   </div>
 </div>
 
 
 ```js
+view(Inputs.table(filtered_top_1000_rollup_by_amt))
 view(Inputs.table(filtered_transactions))
 ```
