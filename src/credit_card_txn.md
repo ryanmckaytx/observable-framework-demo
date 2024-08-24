@@ -16,17 +16,31 @@ const cc_num_col = all_users.getChildAt(0);
 const cc_num_array = [null].concat(cc_num_col.toArray())
 const selected_cc_num = view(
   Inputs.select(cc_num_array, {
-    label: "Select User",
+    label: "Customer",
   })
+);
+const start_date = view(
+  Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-10-01"})
+);
+const end_date = view(
+  Inputs.date({label: "End", min: "2023-01-01", max: "2023-12-31", value: "2023-12-31"})
 );
 ```
 
 ```sql id=filtered_transactions
-SELECT * FROM txn1mm WHERE ${selected_cc_num} IS NULL OR cc_num=${selected_cc_num}
+SELECT * FROM txn1mm 
+WHERE 
+  (${selected_cc_num} IS NULL OR cc_num=${selected_cc_num})
+  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
+  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
 ```
 ```sql id=filtered_category_breakdown
 SELECT category, COUNT(*) as count
-FROM txn1mm WHERE ${selected_cc_num} IS NULL OR cc_num=${selected_cc_num} 
+FROM txn1mm 
+WHERE 
+  (${selected_cc_num} IS NULL OR cc_num=${selected_cc_num})
+  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
+  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
 GROUP BY category
 ```
 
