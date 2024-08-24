@@ -21,15 +21,28 @@ const selected_merchant = view(
     label: "Store",
   })
 );
+const start_date = view(
+  Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-10-01"})
+);
+const end_date = view(
+  Inputs.date({label: "End", min: "2023-01-01", max: "2023-12-31", value: "2023-12-31"})
+);
 ```
 
 ```sql id=filtered_transactions
-SELECT * FROM txn1mm WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
+SELECT * FROM txn1mm 
+WHERE 
+  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
+  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
+  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
 ```
 ```sql id=filtered_rollup_by_location
 select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, merchant, merch_lat lat, merch_long long
 FROM txn1mm
-WHERE ${selected_merchant} IS NULL OR merchant=${selected_merchant}
+WHERE 
+  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
+  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
+  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
 GROUP BY all
 ORDER BY 2 desc
 -- LIMIT 1000
