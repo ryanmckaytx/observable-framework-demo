@@ -26,7 +26,7 @@ const selected_merchant = view(
   })
 );
 const start_date = view(
-  Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-10-01"})
+  Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-12-01"})
 );
 const end_date = view(
   Inputs.date({label: "End", min: "2023-01-01", max: "2023-12-31", value: "2023-12-31"})
@@ -44,17 +44,6 @@ WHERE
   AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
 ORDER BY trans_date ASC
 ```
-```sql id=filtered_rollup_by_location
-select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, merchant, merch_lat lat, merch_long long
-FROM txn1mm
-WHERE 
-  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
-  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
-  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
-GROUP BY all
-ORDER BY 2 desc
--- LIMIT 1000
-```
 ```sql id=filtered_rollup_by_date
 select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, trans_date
 FROM txn1mm
@@ -68,20 +57,45 @@ ORDER BY trans_date ASC
 ```
 ```js
 function salesBars(data, {width} = {}) {
+    return Plot.plot({
+        marginBottom: 100,
+        x: {
+          tickRotate: -45,
+        },
+        marks: [
+            Plot.barY(data, Plot.binX({y: "sum"}, {x:"trans_date", y:"amt", tip:true}))
+        ],
+        width: width,
+    });
+};
+```
+```js
+function salesBars2(data, {width} = {}) {
+    return Plot.plot({
+        marginBottom: 100,
+        x: {
+          tickRotate: -45,
+        },
+        marks: [
+            Plot.barY(data, {
+              x:(d) => Plot.formatIsoDate(d.trans_date), 
+              y:"txn_amt_sum", 
+              tip:true
+            })
+        ],
+        width: width,
+    });
+};
+```
+```js
+function salesBars3(data, {width} = {}) {
     return Plot.plot(
       {
         marks: [
-          Plot.rectY(data, {
-            x: "trans_date", 
-            y: "txn_amt_sum", 
-            interval: "day", 
-            tip:true,
-            fill: "steelblue",
-          }),
+          Plot.rectY(data, {x: "trans_date", y: "txn_amt_sum", interval: "day", tip:true}),
           Plot.ruleY([0])
         ],
         width: width,
-        marginBottom: 50,
       });
 };
 ```
@@ -138,18 +152,21 @@ function salesGeoHexBin(data, {width} = {}) {
 <div class="grid grid-cols-2">
   <div class="card">
     <h2>Sales $ Volume over Time</h2>
-    ${resize((width) => salesBars(filtered_rollup_by_date, {width}))}
+    ${resize((width) => salesBars(filtered_transactions, {width}))}
   </div>
   <div class="card">
-    <h2>Sales $ Volume by Location</h2>
-    ${resize((width) => salesGeoHexBin(filtered_rollup_by_location, {width}))}
+    <h2>Sales $ Volume over Time 2</h2>
+    ${resize((width) => salesBars2(filtered_rollup_by_date, {width}))}
+  </div>
+  <div class="card">
+    <h2>Sales $ Volume over Time 3</h2>
+    ${resize((width) => salesBars3(filtered_rollup_by_date, {width}))}
   </div>
 </div>
 
 
-<!-- ```js
-view(Inputs.table(filtered_rollup_by_location))
+```js
 view(Inputs.table(filtered_transactions))
 view(Inputs.table(summarized_txn))
 view(Inputs.table(filtered_rollup_by_date))
-``` -->
+```

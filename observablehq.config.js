@@ -14,7 +14,8 @@ export default {
         {name: "Credit Card Dashboard", path: "/credit_card_txn"},
         {name: "Weather Dashboard", path: "/weather"},
         {name: "Generated Dashboard", path: "/example-dashboard"},
-        {name: "Generated Report", path: "/example-report"}
+        {name: "Generated Report", path: "/example-report"},
+        {name: "Bar Chart Experiments", path: "/bar-chart-tests"},
       ]
     }
   ],
