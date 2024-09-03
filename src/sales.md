@@ -22,37 +22,49 @@ const merchants = [null].concat(merchants_csv.map(item => item.merchant).sort())
 ```
 
 ```js
-const selected_merchant = view(
-  Inputs.select(merchants, {
-    label: "Store",
-  })
+const filters = view(
+  Object.assign(Inputs.form({
+    merchant: Inputs.select(merchants, {label: "Store"}),
+    start_date: Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-10-01"}),
+    end_date: Inputs.date({label: "End", min: "2023-01-01", max: "2023-12-31", value: "2023-12-31"})
+  }), {className: "inline"})
 );
-const start_date = view(
-  Inputs.date({label: "Start", min: "2023-01-01", max: "2023-12-31", value: "2023-10-01"})
-);
-const end_date = view(
-  Inputs.date({label: "End", min: "2023-01-01", max: "2023-12-31", value: "2023-12-31"})
-);
+```
+
+```html
+<style>
+  .inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 640px;
+  }
+  .inline form {
+    max-width: 200px;
+    display: flow;
+  }
+</style>
 ```
 
 ```sql id=summarized_txn
 summarize txn1mm 
 ```
+
 ```sql id=filtered_transactions
 SELECT * FROM txn1mm 
 WHERE 
-  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
-  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
-  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
+  (${filters.merchant} IS NULL OR merchant=${filters.merchant})
+  AND (${filters.start_date} IS NULL OR trans_date >= ${filters.start_date.toISOString().split('T')[0]})
+  AND (${filters.end_date} IS NULL OR trans_date <= ${filters.end_date.toISOString().split('T')[0]})
 ORDER BY trans_date ASC
 ```
 ```sql id=filtered_rollup_by_location
 select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, merchant, merch_lat lat, merch_long long
 FROM txn1mm
 WHERE 
-  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
-  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
-  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
+  (${filters.merchant} IS NULL OR merchant=${filters.merchant})
+  AND (${filters.start_date} IS NULL OR trans_date >= ${filters.start_date.toISOString().split('T')[0]})
+  AND (${filters.end_date} IS NULL OR trans_date <= ${filters.end_date.toISOString().split('T')[0]})
 GROUP BY all
 ORDER BY 2 desc
 -- LIMIT 1000
@@ -61,9 +73,9 @@ ORDER BY 2 desc
 select count(*) as txn_count, sum(amt) txn_amt_sum, avg(amt) txn_amt_avg, trans_date
 FROM txn1mm
 WHERE 
-  (${selected_merchant} IS NULL OR merchant=${selected_merchant})
-  AND (${start_date} IS NULL OR trans_date >= ${start_date.toISOString().split('T')[0]})
-  AND (${end_date} IS NULL OR trans_date <= ${end_date.toISOString().split('T')[0]})
+  (${filters.merchant} IS NULL OR merchant=${filters.merchant})
+  AND (${filters.start_date} IS NULL OR trans_date >= ${filters.start_date.toISOString().split('T')[0]})
+  AND (${filters.end_date} IS NULL OR trans_date <= ${filters.end_date.toISOString().split('T')[0]})
 GROUP BY all
 ORDER BY trans_date ASC
 -- LIMIT 1000
